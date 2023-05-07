@@ -1,0 +1,186 @@
+#:kivy 1.0.9
+
+<Tab>:
+    do_default_tab: False
+    TabbedPanelItem:
+        text: 'Camera'
+        BoxLayout:
+            orientation:'vertical'
+            Camera:
+                size_hint: 1, .8
+                allow_stretch: True
+                id: camera
+                play: True
+                canvas.before:
+                    PushMatrix:
+                    Rotate:
+                        angle: -90
+                        origin: self.center
+                canvas.after:
+                    PopMatrix:
+            BoxLayout:
+                orientation:'horizontal'
+                size_hint: 1, .2
+                Button:
+                    text: 'Capture'
+                    size_hint: .2, 1
+                    on_release: root.capture()
+                Button:
+                    text: 'Process'
+                    size_hint: .2, 1
+                    on_release: 
+                        root.cam_process()
+                        o1.texture, o2.texture, o3.texture, o4.texture, o5.texture = root.display_output()
+                        counts.text = str(root.process.counts)
+                        avg_size.text = str(root.process.avg_areas)
+                        misc.text = str(root.process.misc_output[1])
+                BoxLayout:
+                    orientation:'vertical'
+                    size_hint: .6, 1
+                    Label:
+                        text: "min_r: " + str(slider_min_r.value)
+                    Slider:
+                        id: slider_min_r
+                        min: 10
+                        max: slider_max_r.value
+                        value: 10
+                        step: 1
+                    Label:
+                        text: "max_r: " + str(slider_max_r.value)
+                    Slider:
+                        id: slider_max_r
+                        min: slider_min_r.value
+                        max: 55
+                        value: 55
+                        step: 1
+    TabbedPanelItem:
+        text: 'ML'
+        BoxLayout:
+            orientation:'vertical'
+            Image:
+                allow_stretch: True
+                keep_ratio: True
+                id: ml_out_texture
+            BoxLayout:
+                orientation:'horizontal'
+                size_hint: 1, .2
+                Button:
+                    text: 'run yolo n'
+                    size_hint: .25, 1
+                    on_release:
+                        ml_out_texture.texture = root.output_ml_yolotfliten()
+                Button:
+                    text: 'run yolo s'
+                    size_hint: .25, 1
+                    on_release:
+                        ml_out_texture.texture = root.output_ml_yolotflites()
+                Button:
+                    text: 'run yolo m'
+                    size_hint: .25, 1
+                    on_release:
+                        ml_out_texture.texture = root.output_ml_yolotflitem()
+                #Button:
+                #    text: 'run yolo l'
+                #    size_hint: .25, 1
+                #    on_release:
+                #        ml_out_texture.texture = root.output_ml_yolotflite4()
+    TabbedPanelItem:
+        text: 'Calibration'
+        BoxLayout:
+            orientation:'vertical'
+            Image:
+                allow_stretch: True
+                keep_ratio: True
+                id: checkerboard
+            BoxLayout:
+                orientation:'horizontal'
+                size_hint: 1, .2
+                Button:
+                    text: 'run checkerboard'
+                    #size_hint: .5, 1
+                    on_release:
+                        checkerboard.texture = root.normalize_image()
+    # third tab
+    TabbedPanelItem:
+        text: 'Output Data'
+        GridLayout:
+            rows: 2
+            GridLayout:
+                cols: 2
+                Label:
+                    text: 'counts: '
+                Label:
+                    id: counts
+                Label:
+                    text: 'avg_size: '
+                Label:
+                    id: avg_size
+                Label:
+                    text: '%change from filter: '
+                Label:
+                    id: misc
+                Button:
+                    text: 'Save Data'
+                    on_release: root.saveCSV()
+    TabbedPanelItem:
+        text: 'Output Images'
+        TabbedPanel:
+            do_default_tab: False
+            TabbedPanelItem:
+                text: 'detected'
+                BoxLayout:
+                    Image:
+                        allow_stretch: True
+                        keep_ratio: True
+                        id: o1
+            TabbedPanelItem:
+                text: 'unfiltered'
+                BoxLayout:
+                    orientation: 'vertical'
+                    Image:
+                        allow_stretch: True
+                        keep_ratio: True
+                        id: o2
+                    Image:
+                        allow_stretch: True
+                        keep_ratio: True
+                        id: o3
+            TabbedPanelItem:
+                text: 'filtered'
+                BoxLayout:
+                    orientation: 'vertical'
+                    Image:
+                        allow_stretch: True
+                        keep_ratio: True
+                        id: o4
+                    Image:
+                        allow_stretch: True
+                        keep_ratio: True
+                        id: o5
+    TabbedPanelItem:
+        text: 'Configuration'
+        BoxLayout:
+            orientation:'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: 'calibration'
+                CheckBox:
+                    id: config_calibrate
+                Label:
+                    text: 'save_output'   
+                CheckBox:
+                    id: so
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: 'auto process'
+                CheckBox:
+                    id: ap
+                Label:
+                    text: 'display message'   
+                CheckBox:
+                    id: dm
+            Button:
+                text: 'Apply'
+                on_release: root.config(config_calibrate.active,so.active,ap.active,dm.active)
