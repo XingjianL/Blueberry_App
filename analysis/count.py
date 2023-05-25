@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import os
 
-#files = "/home/lixin/Classes/Fall22Lab/annotated_blueberry/yolo_dataset/fixed/"
-files = "/home/lixin/Classes/Fall22Lab/annotated_blueberry/yolo_dataset/fixed_final/"
+
+files = "/{change this directory path to labeled txt data}/fixed_final/"
 test_files_n = [files+'test/'+file for file in os.listdir(files+'test/') if ".txt" in file]
 train_files_n = [files+'train/'+file for file in os.listdir(files+'train/') if ".txt" in file]
 val_files_n   =[files+'valid/'+file for file in os.listdir(files+'valid/') if ".txt" in file]
@@ -20,11 +20,36 @@ print(len(train_files), train, train/(train+val+test))
 print(len(val_files), val, val/(train+val+test))
 print(len(test_files), test, test/(train+val+test))
 
-for i, trainfile in enumerate(train_files):
-    widths = trainfile[:,3] * 3024
-    heights = trainfile[:,4] * 4032
-    avg_square_area_pixels = np.average(widths * heights)
+for i, train_files in enumerate(train_files):
+    widths = train_files[:,3] * 3024
+    heights = train_files[:,4] * 4032
+    # largest circle inside the bounding box
+    avg_radius = np.average(np.min([widths, heights], axis=0)/2)
     #print(avg_square_area_pixels)
+    print('TRAIN ', i)
     print(train_files_n[i])
-    print(np.sqrt(avg_square_area_pixels/np.pi))
+    print(avg_radius)
+    print()
+    
+for i, val_files in enumerate(val_files):
+    widths = val_files[:,3] * 3024
+    heights = val_files[:,4] * 4032
+    # largest circle inside the bounding box
+    avg_radius = np.average(np.min([widths, heights], axis=0)/2)
+    #print(avg_square_area_pixels)
+    print('VAL ', i)
+    print(val_files_n[i])
+    print(avg_radius)
+    print()
+
+
+for i, test_files in enumerate(test_files):
+    widths = test_files[:,3] * 3024
+    heights = test_files[:,4] * 4032
+    # largest circle inside the bounding box
+    avg_radius = np.average(np.min([widths, heights], axis=0)/2)
+    #print(avg_square_area_pixels)
+    print('TEST ', i)
+    print(test_files_n[i])
+    print(avg_radius)
     print()

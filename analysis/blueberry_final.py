@@ -5,7 +5,7 @@ import sys
 import cv2
 import matplotlib.pyplot as plt
 
-from kivyapp.blueberry import SCALING_FACTOR
+#from kivyapp.blueberry import SCALING_FACTOR
 
 #SCALING_FACTOR = 0.5
 
@@ -117,9 +117,9 @@ def circularity(img, num_circles):
 
 if __name__ == "__main__":
     img_dirs = []
-    img_folder = "/home/lixin/Classes/Fall22Lab/drive-download-20220904T003514Z-001/"
+    img_folder = "{change this to folder with image files}"
     folder = "auburn"
-    #img_folder = "/home/lixin/Classes/Fall22Lab/Fairhope_052322/"
+    #img_folder = "{change this to folder with image files}"
     #folder = "fairhope"
     for image in os.listdir(img_folder):
         if image.endswith(".jpg"):
@@ -130,8 +130,8 @@ if __name__ == "__main__":
     print(img_folder + img_dirs[img_select])
 
     frame = cv2.imread(img_folder + img_dirs[img_select])
-    width = int(frame.shape[1] * SCALING_FACTOR)
-    height = int(frame.shape[0] * SCALING_FACTOR)
+    #width = int(frame.shape[1] * SCALING_FACTOR)
+    #height = int(frame.shape[0] * SCALING_FACTOR)
     #print(frame.shape)
     #frame = cv2.rotate(frame,cv2.ROTATE_90_CLOCKWISE)
     frame = cv2.resize(frame, (1500, 2000))
@@ -184,46 +184,15 @@ if __name__ == "__main__":
     cv2.rectangle(raw_circle,(x_bounds[0],y_bounds[0]),(x_bounds[1],y_bounds[1]),(255,0,0),5)
     #print(y_bounds, x_bounds)
 
+    # crop for the region with blueberries
     focused_frame = frame[y_bounds[0]:y_bounds[1],x_bounds[0]:x_bounds[1],:]
     focused_mask = raw_circle_mask[y_bounds[0]:y_bounds[1],x_bounds[0]:x_bounds[1]]
     focused_center = blueberry_center[y_bounds[0]:y_bounds[1],x_bounds[0]:x_bounds[1]]
-    #focused_frame = cv2.GaussianBlur(focused_frame, (5,5), 0)
-    #focused_frame = cv2.boxFilter(focused_frame,-1,(3,3))
-    #focused_frame = cv2.boxFilter(focused_frame,-1,(11,11))
 
-    #lab = cv2.cvtColor(focused_frame,cv2.COLOR_BGR2LAB)
-    #hsv = cv2.cvtColor(focused_frame,cv2.COLOR_BGR2HSV)
-    #hls = cv2.cvtColor(focused_frame,cv2.COLOR_BGR2HLS)
-
-
-    #test_color = np.empty(focused_frame.shape, dtype=np.uint8)
-    #test_color[:,:,0] = HDI(lab)
-    #test_color[:,:,1] = HDI(hls)
-    #test_color[:,:,2] = (test_color[:,:,1] / test_color[:,:,0])
-
-    #test = test_color.copy()
-    #test[:,:,0] = np.where(test_color[:,:,0] > 120, 0, 255)
-    #test[:,:,1] = np.where(test_color[:,:,1] > 140, 255, 0)
-    #test[:,:,2] = np.where(test_color[:,:,2] > 0, 255, 0)
-    #test = cv2.boxFilter(test,-1,(21,21))
-    #test = cv2.GaussianBlur(test,(3,3),0)
-    #test = cv2.GaussianBlur(test,(11,11),0)
-    #test = cv2.GaussianBlur(test,(3,3),0)
+    # watershed segmentation
     blueberry_stage_4 = watershed(focused_frame,focused_mask,focused_center)
-    #test = cv2.blur(test,(5,5))
-    # embedd HDI and original watershed, then align with region growing
-    #color_filter = otsuThresholding(cv2.cvtColor(test,cv2.COLOR_BGR2GRAY))
-    #color_filter = color_filter - focused_center
-    #color_filter = cv2.morphologyEx(color_filter, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(9,9)), iterations=1)
-    #color_filter = cv2.erode(color_filter,(3,3))
-    #color_filter = cv2.morphologyEx(color_filter, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(9,9)), iterations=2)
 
-
-    #color_filter_2 = otsuThresholding(cv2.cvtColor(focused_frame,cv2.COLOR_RGB2GRAY))
-
-    #final_stage = cv2.bitwise_and(blueberry_stage_4[0],blueberry_stage_4[0])#,mask=color_filter)
-    #final_stage = np.where(blueberry_stage_4[0] == final_stage, blueberry_stage_4[0], 1)
-
+    # determine for circularity segmentations
     non_circles = circularity(blueberry_stage_4[0], np.max(blueberry_stage_4[0])-1)
     #print(non_circles)
     filtered_final_stage = blueberry_stage_4[0].copy()
@@ -231,6 +200,7 @@ if __name__ == "__main__":
     num_filtered = np.count_nonzero(non_circles)
     #print(num_filtered)
 
+    # compute pixel area
     focus_area = (y_bounds[1]-y_bounds[0]) * (x_bounds[1] - x_bounds[0])
     background_area = np.count_nonzero(blueberry_stage_4[0] == 1)
     final = np.uint8(np.where(blueberry_stage_4[0] == 1, 0, 255))
