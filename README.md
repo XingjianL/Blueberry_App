@@ -2,7 +2,7 @@
 ### Paper: Developing Automated Tools for Blueberry Count, Weight, and Size Estimation on a Mobile Device.
 <br>
 
-The results are derived from the `/analysis` folder. Remember to change the folder paths in the scripts. The outputs are in pixels that have to be normalized to weight estimations, see `Results Data.pdf`. The numbers are provided in corresponding `csv` files.
+The results are derived from the `/analysis` folder. Remember to change the folder paths in the scripts. The outputs are in pixels that have to be normalized to weight estimations, see `Results Data.pdf`. The numbers are provided in corresponding `csv` files, though the exact formulas are in a google sheet that isn't in this repo.
 
 The image data are not in this repo, the trained yolov5-tflite models are in `/app/ml` folder.
 
