@@ -6,7 +6,8 @@ The results are derived from the `/analysis` folder. Remember to change the fold
 
 The formulas for code output to weight conversion are found in this google sheet https://docs.google.com/spreadsheets/d/1suRo_dzZep_iEYM4tDjqicqdjTjlFvgzDVJ6NQpnW4A/edit?usp=sharing.
 
-The image data can be found here: https://drive.google.com/drive/folders/1NXhgfqKMEBnDkbVKodzXc4zurVZLxYua?usp=sharing. 
+The image data can be found here: https://drive.google.com/drive/folders/1NXhgfqKMEBnDkbVKodzXc4zurVZLxYua?usp=sharing.
+The measured data can be found here: https://docs.google.com/spreadsheets/d/1Glqo5AWIOhi8ugiCEquMaB369hh2i60z/edit?usp=sharing&ouid=104460468007818024731&rtpof=true&sd=true
 
 The trained yolov5-tflite models are in the `/app/ml` folder.
 
