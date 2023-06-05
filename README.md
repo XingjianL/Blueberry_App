@@ -1,5 +1,7 @@
-## This repo host the source code and tools used to derive the results and application.
-### Paper: Developing Automated Tools for Blueberry Count, Weight, and Size Estimation on a Mobile Device.
+
+## Paper: Developing Automated Tools for Blueberry Count, Weight, and Size Estimation on a Mobile Device.
+
+### This repo host the source code and tools used to derive the results and application.
 <br>
 The image data can be found here: https://drive.google.com/drive/folders/1NXhgfqKMEBnDkbVKodzXc4zurVZLxYua?usp=sharing.
 
