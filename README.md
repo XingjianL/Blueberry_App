@@ -1,10 +1,15 @@
-## This repo host the source code and tools used to derive the results and application.
-### Paper: Developing Automated Tools for Blueberry Count, Weight, and Size Estimation on a Mobile Device.
+
+## Paper: Developing Automated Tools for Blueberry Count, Weight, and Size Estimation on a Mobile Device.
+
+### This repo host the source code and tools used to derive the results and application.
 <br>
+The image data can be found here: https://drive.google.com/drive/folders/1NXhgfqKMEBnDkbVKodzXc4zurVZLxYua?usp=sharing.
 
-The results are derived from the `/analysis` folder. Remember to change the folder paths in the scripts. The outputs are in pixels that have to be normalized to weight estimations, see `Results Data.pdf`. The numbers are provided in corresponding `csv` files, the formulas for area to weight conversion are found in this google sheet https://docs.google.com/spreadsheets/d/1suRo_dzZep_iEYM4tDjqicqdjTjlFvgzDVJ6NQpnW4A/edit?usp=sharing.
+The measured data can be found here: https://docs.google.com/spreadsheets/d/1Glqo5AWIOhi8ugiCEquMaB369hh2i60z/edit?usp=sharing&ouid=104460468007818024731&rtpof=true&sd=true
 
-The image file data are not in this repo. The trained yolov5-tflite models are in the `/app/ml` folder.
+The results are derived from the `/analysis` folder. Remember to change the folder paths in the scripts. The formulas for code output to weight conversion are found in this google sheet https://docs.google.com/spreadsheets/d/1suRo_dzZep_iEYM4tDjqicqdjTjlFvgzDVJ6NQpnW4A/edit?usp=sharing.
+
+The trained yolov5-tflite models are in the `/app/ml` folder.
 
 <br>
 
