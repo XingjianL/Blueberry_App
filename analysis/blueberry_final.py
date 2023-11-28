@@ -5,17 +5,24 @@ import sys
 import cv2
 import matplotlib.pyplot as plt
 
-#from kivyapp.blueberry import SCALING_FACTOR
+from kivyapp.blueberry import SCALING_FACTOR
 
 #SCALING_FACTOR = 0.5
-
+np.set_printoptions(suppress=True)
 def findRealBlueBerry(circles, colors):
-    # stack together coord of circle center, and the color of circle center
-    embedded_circle = np.hstack((circles[:,:2], np.where(colors<90, 0, 255)))
+    # stack together coord and color of circle center, with a threshold for the colors
+    embedded_circle = np.hstack((circles[:,:2], np.where(colors<90, 0, 1000)))
     # calculate the mean of (x, y, blue, green, red)
     mean, std = np.mean(embedded_circle, axis = 0), np.std(embedded_circle, axis=0)
-    # check the outliers of each (x, y, b, g, r), coord uses 2.5 * std, colors uses 1.5 * std
-    element_is_outlier = np.abs(embedded_circle - mean) > ([2.5, 2.5, 1.5, 1.5, 1.5]*std)
+    # check the outliers of each (x, y, b, g, r), coord uses 2.5 * std, colors uses 1 * std or 2.5 std depending on std value
+    #print(embedded_circle)
+    #print(mean)
+    #print(std)
+    if (any(std[2:] > 100)):
+        #print(np.abs(embedded_circle - mean))
+        element_is_outlier = np.abs(embedded_circle - mean) > ([3, 3, 1, 1, 1]*std)
+    else:
+        element_is_outlier = np.abs(embedded_circle - mean) > ([3, 3, 2.5, 2.5, 2.5]*std)
     # compile for each circle
     circle_is_outlier = np.any(element_is_outlier, axis = 1)
     #print(mean + 1.5*std)
@@ -115,26 +122,14 @@ def circularity(img, num_circles):
             output[i] = int(i+2)
     return output
 
-if __name__ == "__main__":
-    img_dirs = []
-    img_folder = "{change this to folder with image files}"
-    folder = "auburn"
-    #img_folder = "{change this to folder with image files}"
-    #folder = "fairhope"
-    for image in os.listdir(img_folder):
-        if image.endswith(".jpg"):
-            img_dirs.append(image)
-    img_dirs = np.sort(img_dirs)
-    img_select = int(sys.argv[1])-1
-
-    print(img_folder + img_dirs[img_select])
-
-    frame = cv2.imread(img_folder + img_dirs[img_select])
-    #width = int(frame.shape[1] * SCALING_FACTOR)
-    #height = int(frame.shape[0] * SCALING_FACTOR)
+def GenerateOutput(frame, folder, img_select, resolutions_scale = 500):
+    if (frame.shape[0] < frame.shape[1]):
+        frame = cv2.rotate(frame,cv2.ROTATE_90_CLOCKWISE)
     #print(frame.shape)
     #frame = cv2.rotate(frame,cv2.ROTATE_90_CLOCKWISE)
-    frame = cv2.resize(frame, (1500, 2000))
+    imgsz = (3*resolutions_scale,4*resolutions_scale) 
+    print(imgsz)
+    frame = cv2.resize(frame, imgsz)
     #print(frame.shape)
     # find all circles [(cir_x, cir_y, radius), ...]
     try:
@@ -176,23 +171,18 @@ if __name__ == "__main__":
                 #raw_circle_mask = cv2.circle(raw_circle_mask, center, radius+30, 1, thickness=-1)
                 raw_circle_mask = cv2.circle(raw_circle_mask, center, radius+40, 1, thickness=-1)
                 blueberry_center = cv2.circle(blueberry_center, center, 25, 1, thickness=-1)
-                
-    kernel1 = np.array([[0,-1,0],[-1, 5, -1],[0,-1,0]])
-    kernel2 = np.array([[-1,0,-1],[0, 5, 0],[-1,0,-1]])
+
     y_bounds = [np.min(np.nonzero(raw_circle_mask)[0]), np.max(np.nonzero(raw_circle_mask)[0])]
     x_bounds = [np.min(np.nonzero(raw_circle_mask)[1]), np.max(np.nonzero(raw_circle_mask)[1])]
     cv2.rectangle(raw_circle,(x_bounds[0],y_bounds[0]),(x_bounds[1],y_bounds[1]),(255,0,0),5)
     #print(y_bounds, x_bounds)
 
-    # crop for the region with blueberries
     focused_frame = frame[y_bounds[0]:y_bounds[1],x_bounds[0]:x_bounds[1],:]
     focused_mask = raw_circle_mask[y_bounds[0]:y_bounds[1],x_bounds[0]:x_bounds[1]]
     focused_center = blueberry_center[y_bounds[0]:y_bounds[1],x_bounds[0]:x_bounds[1]]
 
-    # watershed segmentation
     blueberry_stage_4 = watershed(focused_frame,focused_mask,focused_center)
 
-    # determine for circularity segmentations
     non_circles = circularity(blueberry_stage_4[0], np.max(blueberry_stage_4[0])-1)
     #print(non_circles)
     filtered_final_stage = blueberry_stage_4[0].copy()
@@ -200,7 +190,6 @@ if __name__ == "__main__":
     num_filtered = np.count_nonzero(non_circles)
     #print(num_filtered)
 
-    # compute pixel area
     focus_area = (y_bounds[1]-y_bounds[0]) * (x_bounds[1] - x_bounds[0])
     background_area = np.count_nonzero(blueberry_stage_4[0] == 1)
     final = np.uint8(np.where(blueberry_stage_4[0] == 1, 0, 255))
@@ -218,7 +207,8 @@ if __name__ == "__main__":
     print("tests: ", focus_area)
     print("tests: ", background_area_f)
     print("tests: ",(np.max(blueberry_stage_4[0])-1-num_filtered))
-    print("tests: ", frame.shape)
+    #np.savetxt("/home/lixin/Classes/Fall22Lab/blueberry_final.csv", )
+    #print("tests: ", frame.shape)
     final = cv2.bitwise_and(focused_frame,focused_frame,mask=final)
     final_f = cv2.bitwise_and(focused_frame,focused_frame,mask=final_f)
     final_inv_f = cv2.bitwise_and(focused_frame,focused_frame,mask=final_inv_f)
@@ -244,14 +234,12 @@ if __name__ == "__main__":
     overall_g = np.hstack((blueberry_stage_4[0],filtered_final_stage,blueberry_stage_4[0]-filtered_final_stage))
     normalized_watershed = np.uint8(overall_g*255/np.max(overall_g))
 
-    #fig, axes = plt.subplots(2,1)
-    #axes[0].imshow(overall)
-    #axes[1].imshow(overall_g)
-    plt.imshow(frame)
-    plt.show()
-
-
-
+    fig, axes = plt.subplots(3,1)
+    axes[0].imshow(overall)
+    axes[1].imshow(overall_g)
+    axes[2].imshow(raw_circle)
+    #plt.imshow(frame)
+    #plt.show()
 
     cv2.imwrite('./output_{folder:s}/{src:d}/{ver:d}.jpg'.format(folder = folder, src = img_select+1, ver = img_select+1), raw_circle)
     cv2.imwrite('./output_{folder:s}/{src:d}/{ver:d}_watershed.jpg'.format(folder = folder, src = img_select+1, ver = img_select+1), normalized_watershed)
@@ -260,3 +248,43 @@ if __name__ == "__main__":
     print('./output_{folder:s}/{src:d}/{ver:d}_output.jpg'.format(folder = folder, src = img_select+1, ver = img_select+1))
     #print(sys.argv[:])
     print("\n")
+    plt.close()
+    return np.max(blueberry_stage_4[0])-1, area, filtered_area
+
+if __name__ == "__main__":
+    img_dirs = []
+    #img_folder = "/home/lixin/Classes/Fall22Lab/drive-download-20220904T003514Z-001/"
+    #folder = "auburn" #500
+    #img_folder = "/home/lixin/Classes/Fall22Lab/Fairhope_052322/"
+    #folder = "fairhope" #500
+    img_folder = "/home/lixin/Classes/Fall22Lab/Data2023-20230714T162453Z-001/Data2023/BW0516/"
+    folder = "brewton" #470
+    #img_folder = "/home/lixin/Classes/Fall22Lab/Data2023-20230714T162453Z-001/Data2023/EV0511/"
+    #folder = "tallassee" #470
+    #img_folder = "/home/lixin/Classes/Fall22Lab/Data2023-20230714T162453Z-001/Data2023/EV0519/"
+    #folder = "ev0519" #470 #410 (one image)
+
+    resolutions_scale = 410 #500
+    for image in os.listdir(img_folder):
+        if image.endswith(".jpg"):
+            img_dirs.append(image)
+    img_dirs = np.sort(img_dirs)
+    if len(sys.argv) > 1:
+        img_select = int(sys.argv[1])-1
+    else:
+        img_select = None
+    
+    results = []
+    if img_select is None:
+        for i, img_file in enumerate(img_dirs):
+            print(i)
+            frame = cv2.imread(img_folder + img_file)
+            count, area, filtered = GenerateOutput(frame, folder, i, resolutions_scale=resolutions_scale)
+            results.append([img_file, count, area, filtered])
+        np.savetxt("/home/lixin/Classes/Fall22Lab/blueberry_final.csv",np.array(results),delimiter=',',header='file,count,area,filtered',fmt="%s")
+    else:
+        frame = cv2.imread(img_folder + img_dirs[img_select])
+        count, area, filtered = GenerateOutput(frame, folder, img_select, resolutions_scale=resolutions_scale)
+        #results.append([img_dirs[img_select], count, area, filtered])
+    
+    
