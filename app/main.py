@@ -297,6 +297,18 @@ class Tab(TabbedPanel):
         end = time.time()
         print(f"Processing took: {end-start} seconds")
         return out_texture
+    def output_ml_yolotflitebifpn(self):
+        start = time.time()
+        weight_path = 'ml/s_bifpn_ghost-fp16.tflite'
+        image = self.current_image.copy()
+        out_img, count, avg_area = tf_code.run_ml_tflite(image, weight_path)
+        self.outputs[1] = "ML_BIFPN"
+        self.outputs[2] = count
+        self.outputs[3] = avg_area
+        out_texture = self.process.cv2Kivy(out_img)
+        end = time.time()
+        print(f"Processing took: {end-start} seconds")
+        return out_texture
     #def output_ml_yolotflite4(self):
     #    weight_path = 'ml/yolov5l-best-fp16.tflite'
     #    image = self.current_image.copy()

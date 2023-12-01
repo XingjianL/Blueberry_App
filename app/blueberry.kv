@@ -1,4 +1,4 @@
-#:kivy 1.0.9
+#:kivy 1.11.1
 
 <Tab>:
     do_default_tab: False
@@ -11,7 +11,7 @@
                 allow_stretch: True
                 id: camera
                 play: True
-                resolution: (1920, 1080)
+                #resolution: (1920, 1080)
                 canvas.before:
                     PushMatrix:
                     Rotate:
@@ -80,11 +80,11 @@
                     size_hint: .25, 1
                     on_release:
                         ml_out_texture.texture = root.output_ml_yolotflitem()
-                #Button:
-                #    text: 'run yolo l'
-                #    size_hint: .25, 1
-                #    on_release:
-                #        ml_out_texture.texture = root.output_ml_yolotflite4()
+                Button:
+                    text: 'run yolo bifpn-ghost'
+                    size_hint: .25, 1
+                    on_release:
+                        ml_out_texture.texture = root.output_ml_yolotflitebifpn()
     TabbedPanelItem:
         text: 'Calibration'
         BoxLayout:
