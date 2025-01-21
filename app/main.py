@@ -122,7 +122,7 @@ class Tab(TabbedPanel):
         self.image_names = []
         self.total_images = 0
         self.current_image_path = ''
-        self.current_image = 0
+        self.current_image = cv2.resize(cv2.imread("PXL_20220621_170048957.jpg")[1200:int(1200+640*2.5), 850:int(850+480*2.5)], (480,640))
 
         self.outputs = [0,0,0,0] # timestamp, method, counts, estimate
 
@@ -185,8 +185,8 @@ class Tab(TabbedPanel):
             return photo, edit_photo, blank, blank, blank
         else:
             temp = self.process.output_images[0].copy()
-            cv2.circle(temp,(100,100),int(self.ids.slider_max_r.value),color=(0,255,0),thickness=-1)
-            cv2.circle(temp,(100,100),int(self.ids.slider_min_r.value),color=(0,0,255),thickness=-1)
+            cv2.circle(temp,(400,100),int(self.ids.slider_max_r.value),color=(0,255,0),thickness=-1)
+            cv2.circle(temp,(400,100),int(self.ids.slider_min_r.value),color=(0,0,255),thickness=-1)
             edit_photo = self.process.cv2Kivy(temp)
             return edit_photo, self.current_outputs[1], self.current_outputs[5], self.current_outputs[3], self.current_outputs[6]
 
@@ -263,19 +263,20 @@ class Tab(TabbedPanel):
         return out_texture
     def output_ml_yolotfliten(self):
         start = time.time()
-        weight_path = 'ml/yolov5n-best-fp16.tflite'
+        weight_path = 'ml/models/v5n-best-fp16.tflite'
         image = self.current_image.copy()
         out_img, count, avg_area = tf_code.run_ml_tflite(image, weight_path)
         self.outputs[1] = "ML_Nano"
         self.outputs[2] = count
         self.outputs[3] = avg_area
+        print(out_img.shape, count, avg_area)
         out_texture = self.process.cv2Kivy(out_img)
         end = time.time()
         print(f"Processing took: {end-start} seconds")
         return out_texture
     def output_ml_yolotflites(self):
         start = time.time()
-        weight_path = 'ml/yolov5s-best-fp16.tflite'
+        weight_path = 'ml/models/v5s-best-fp16.tflite'
         image = self.current_image.copy()
         out_img, count, avg_area = tf_code.run_ml_tflite(image, weight_path)
         self.outputs[1] = "ML_Small"
@@ -287,7 +288,7 @@ class Tab(TabbedPanel):
         return out_texture
     def output_ml_yolotflitem(self):
         start = time.time()
-        weight_path = 'ml/yolov5m-best-fp16.tflite'
+        weight_path = 'ml/models/v5m-best-fp16.tflite'
         image = self.current_image.copy()
         out_img, count, avg_area = tf_code.run_ml_tflite(image, weight_path)
         self.outputs[1] = "ML_Medium"
@@ -299,7 +300,7 @@ class Tab(TabbedPanel):
         return out_texture
     def output_ml_yolotflitebifpn(self):
         start = time.time()
-        weight_path = 'ml/s_bifpn_ghost-fp16.tflite'
+        weight_path = 'ml/models/v5s-gh-bi-best-fp16.tflite'
         image = self.current_image.copy()
         out_img, count, avg_area = tf_code.run_ml_tflite(image, weight_path)
         self.outputs[1] = "ML_BIFPN"

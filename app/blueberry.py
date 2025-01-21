@@ -10,7 +10,11 @@ def findRealBlueBerry(circles, colors):
     # calculate the mean of (x, y, blue, green, red)
     mean, std = np.mean(embedded_circle, axis = 0), np.std(embedded_circle, axis=0)
     # check the outliers of each (x, y, b, g, r), coord uses 2.5 * std, colors uses 1.5 * std
-    element_is_outlier = np.abs(embedded_circle - mean) > ([2.5, 2.5, 1.5, 1.5, 1.5]*std)
+    if (any(std[2:] > 100)):
+        #print(np.abs(embedded_circle - mean))
+        element_is_outlier = np.abs(embedded_circle - mean) > ([3, 3, 2.5, 2.5, 2.5]*std)
+    else:
+        element_is_outlier = np.abs(embedded_circle - mean) > ([3, 3, 2.5, 2.5, 2.5]*std)
     # compile for each circle
     circle_is_outlier = np.any(element_is_outlier, axis = 1)
     #print(mean + 1.5*std)
